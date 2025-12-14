@@ -3,8 +3,8 @@ from tkinter import messagebox
 import random
 import string
 
-LISTA DE CUVINTE +  INDICIU
-cuvinte_usoare = [
+# LISTA DE CUVINTE +  INDICIU
+cuvinte_usor = [
     ("voltmetru", "Instrument pentru masurarea tensiunii electrice dintre doua puncte"),
     ("ampermetru", "Instrument pentru masurarea intensitatii curentului electric"),
     ("baterie", "Sursa de energie chimica transformata in energie electrica"),
@@ -30,7 +30,7 @@ cuvinte_usoare = [
     ("comutator", "Dispozitiv care intrerupe sau inchide un circuit electric")
 ]
 
-cuvinte_dificile = [
+cuvinte_dificil = [
     ("condensator", "Componenta care stocheaza energie electrica in camp electric"),
     ("inductanta", "Proprietatea unui conductor de a se opune schimbarii curentului"),
     ("transistor", "Dispozitiv semiconductor utilizat ca amplificator sau comutator"),
@@ -115,6 +115,7 @@ class Spanzuratoare:
         self.indiciu_btn.pack(pady=5)
         self.litera_bonus_btn = tk.Button(master, text="Foloseste 3 puncte pentru o litera", command=self.litera_bonus, state=tk.DISABLED)
         self.litera_bonus_btn.pack(pady=5)
+        
 
     def start_joc(self, nivel):
         # Blocam alegerea dificultatii
@@ -143,32 +144,43 @@ class Spanzuratoare:
         self.update_litere_buttons()
         self.update_display()
         self.deseneaza_spanzuratoare()
+        
 
     def update_litere_buttons(self):
-        for widget in self.litere_frame.winfo_children():
-            widget.destroy()
-        for idx, litera in enumerate(string.ascii_lowercase):
-            btn = tk.Button(self.litere_frame, text=litera.upper(), width=4,
-                            command=lambda l=litera: self.verifica_litera(l))
-            btn.grid(row=idx//9, column=idx%9, padx=2, pady=2)
+        # Creează butoanele pentru literele A-Z și le pune în litere_frame
+      for widget in self.litere_frame.winfo_children():
+        widget.destroy()
+      self.butoane_litere = {}  # dictionar pentru referinte
 
+      for idx, litera in enumerate(string.ascii_lowercase):
+        btn = tk.Button(self.litere_frame, text=litera.upper(), width=4,
+                        command=lambda l=litera: self.verifica_litera(l))
+        btn.grid(row=idx//9, column=idx%9, padx=2, pady=2)
+        self.butoane_litere[litera] = btn
+
+        
     def verifica_litera(self, litera):
-        if litera in self.litere_folosite:
-            return
-        self.litere_folosite.append(litera)
+      if litera in self.litere_folosite:
+        return
+      self.litere_folosite.append(litera)
 
-        if litera in self.cuvant_secret:
-            for idx, l in enumerate(self.cuvant_secret):
-                if l == litera:
-                    self.litere_gasite[idx] = litera
-                    self.scor += 1  # 1 punct per litera ghicita
-        else:
-            self.greseli += 1
+      # Dezactiveaza butonul corespunzator
+      if litera in self.butoane_litere:
+        self.butoane_litere[litera].config(state=tk.DISABLED)
 
-        self.update_display()
-        self.deseneaza_spanzuratoare()
-        self.check_game_over()
+      if litera in self.cuvant_secret:
+        for idx, l in enumerate(self.cuvant_secret):
+            if l == litera:
+                self.litere_gasite[idx] = litera
+                self.scor += 1  # 1 punct per litera ghicita
+      else:
+        self.greseli += 1
 
+      self.update_display()
+      self.deseneaza_spanzuratoare()
+      self.check_game_over()
+
+      
     def update_display(self):
         self.cuvant_label.config(text=" ".join(self.litere_gasite))
         self.greseli_label.config(text=f"Greseli: {self.greseli}/{self.max_greseli}")
@@ -176,13 +188,25 @@ class Spanzuratoare:
         self.scor_label.config(text=f"Scor: {self.scor}")
 
     def arata_indiciu(self):
-        ghicite = sum(1 for l1, l2 in zip(self.litere_gasite, self.cuvant_secret) if l1 == l2 and l1 != "_")
-        if ghicite >= 3:
+      # litere DISTINCTE ghicite corect
+      litere_distincte = {
+        l for l in self.litere_gasite
+        if l != "_" and l.isalpha()
+      }
+
+      if len(litere_distincte) >= 3:
+        if not self.indiciu_folosit:
+            self.scor -= 2
             self.indiciu_folosit = True
+            self.update_display()
             messagebox.showinfo("Indiciu", self.indiciu)
         else:
-            messagebox.showinfo("Indiciu", "Trebuie sa ghicesti cel putin 3 litere pentru a cere indiciu!")
-
+            messagebox.showinfo("Indiciu", "Ai folosit deja indiciul!")
+      else:
+        messagebox.showinfo(
+            "Indiciu",
+            "Trebuie sa ghicesti cel putin 3 litere diferite pentru a cere indiciu!"
+        )
     def litera_bonus(self):
         if self.scor >= 3:
             for idx, l in enumerate(self.litere_gasite):
@@ -233,6 +257,6 @@ class Spanzuratoare:
         if self.greseli >= 6:
             self.canvas.create_line(200, 170, 230, 200, width=2)
 
-root = tk.Tk()
-joc = Spanzuratoare(root)
-root.mainloop()
+root = tk.Tk() ## tk.Tk() creează fereastra principală a aplicației
+joc = Spanzuratoare(root) ## self.master din clasa ta va fi root
+root.mainloop() ## mainloop() pornește bucla principală a ferestrei Tkinter
