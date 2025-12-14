@@ -3,7 +3,7 @@ from tkinter import messagebox
 import random
 import string
 
-# --- LISTA DE CUVINTE CU INDICII (fara diacritice) ---
+LISTA DE CUVINTE +  INDICIU
 cuvinte_usoare = [
     ("voltmetru", "Instrument pentru masurarea tensiunii electrice dintre doua puncte"),
     ("ampermetru", "Instrument pentru masurarea intensitatii curentului electric"),
@@ -203,11 +203,6 @@ class Spanzuratoare:
                 self.scor += 3
             else:
                 self.scor += 5
-            # Bonus pentru utilizarea minima a indiciului / literelor bonus
-            if not self.indiciu_folosit:
-                self.scor += 2
-            if not self.litera_bonus_folosita:
-                self.scor += 2
 
             msg = f"Ai ghicit cuvantul: {self.cuvant_secret}\nScor curent: {self.scor}\nVrei sa continui jocul?"
             if messagebox.askyesno("Felicitari!", msg):
